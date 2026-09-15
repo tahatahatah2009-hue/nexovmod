@@ -9,14 +9,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Java and NDK
-        uses: android-actions/setup-ndk@v3
-        with:
-          ndk-version: r25b
-          local-cache: true
-
-      - name: Compile Library
+      - name: Build with NDK
         run: |
+          echo "Downloading NDK..."
+          curl -LO https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
+          unzip -q android-ndk-r25b-linux.zip
+          export NDK_ROOT=$PWD/android-ndk-r25b
+
           cd $GITHUB_WORKSPACE
           cat << 'EOF' > Android.mk
           LOCAL_PATH := $(call my-dir)
@@ -32,7 +31,7 @@ jobs:
           APP_PLATFORM := android-21
           EOF
 
-          $ANDROID_NDK_HOME/ndk-build
+          $NDK_ROOT/ndk-build
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
