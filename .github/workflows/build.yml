@@ -9,15 +9,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Android NDK
-        uses: nttld/setup-ndk@v3
-        id: setup-ndk
-        with:
-          ndk-version: r25b
-          add-to-path: true
-
-      - name: Compile with NDK
+      - name: Set up NDK and Build
         run: |
+          # تحميل وتثبيت NDK يدوياً بكل سهولة
+          echo "Downloading Android NDK..."
+          wget -q https://dl.google.com/android/repository/android-ndk-r25b-linux.zip
+          unzip -q android-ndk-r25b-linux.zip
+          export NDK_ROOT=$PWD/android-ndk-r25b
+
+          # إنشاء ملفات البناء
           cd $GITHUB_WORKSPACE
           cat << 'EOF' > Android.mk
           LOCAL_PATH := $(call my-dir)
@@ -33,11 +33,11 @@ jobs:
           APP_PLATFORM := android-21
           EOF
 
-          ndk-build
+          # تنفيذ البناء باستخدام NDK
+          $NDK_ROOT/ndk-build
 
-      - name: Upload artifact
+      - name: Upload compiled library
         uses: actions/upload-artifact@v4
         with:
           name: compiled-so
           path: libs/arm64-v8a/*.so
-
